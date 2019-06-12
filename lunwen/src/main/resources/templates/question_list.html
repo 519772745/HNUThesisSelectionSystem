@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script type="text/javascript" src="scripts/jquery/jquery-1.7.1.js"></script>
+	<link href="style/authority/basic_layout.css" rel="stylesheet" type="text/css">
+	<link href="style/authority/common_style.css" rel="stylesheet" type="text/css">
+	<link href="style/authority/student.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="scripts/authority/commonAll.js"></script>
+	<script type="text/javascript" src="scripts/fancybox/jquery.fancybox-1.3.4.js"></script>
+	<script type="text/javascript" src="scripts/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+	<link rel="stylesheet" type="text/css" href="style/authority/jquery.fancybox-1.3.4.css" media="screen">
+	</link>
+	<script type="text/javascript" src="scripts/artDialog/artDialog.js?skin=default"></script>
+	<title>信息管理系统</title>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			/** 新增   **/
+			$("#addBtn").fancybox({
+				'href': 'house_edit.html',
+				'width': 733,
+				'height': 530,
+				'type': 'iframe',
+				'hideOnOverlayClick': false,
+				'showCloseButton': false,
+				'onClosed': function () {
+					window.location.href = 'house_list.html';
+				}
+			});
+
+			/** 导入  **/
+			$("#importBtn").fancybox({
+				'href': '/xngzf/archives/importFangyuan.action',
+				'width': 633,
+				'height': 260,
+				'type': 'iframe',
+				'hideOnOverlayClick': false,
+				'showCloseButton': false,
+				'onClosed': function () {
+					window.location.href = 'house_list.html';
+				}
+			});
+
+			/**编辑   **/
+			$("a.edit").fancybox({
+				'width': 733,
+				'height': 530,
+				'type': 'iframe',
+				'hideOnOverlayClick': false,
+				'showCloseButton': false,
+				'onClosed': function () {
+					window.location.href = 'house_list.html';
+				}
+			});
+		});
+		/** 用户角色   **/
+		var userRole = '';
+
+		/** 模糊查询来电用户  **/
+		function search() {
+			$("#submitForm").attr("action", "house_list.html?page=" + 1).submit();
+		}
+
+		/** 新增   **/
+		function add() {
+			$("#submitForm").attr("action", "/xngzf/archives/luruFangyuan.action").submit();
+		}
+
+		/** Excel导出  **/
+		function exportExcel() {
+			if (confirm('您确定要导出吗？')) {
+				var fyXqCode = $("#fyXq").val();
+				var fyXqName = $('#fyXq option:selected').text();
+				//	 		alert(fyXqCode);
+				if (fyXqCode == "" || fyXqCode == null) {
+					$("#fyXqName").val("");
+				} else {
+					//	 			alert(fyXqCode);
+					$("#fyXqName").val(fyXqName);
+				}
+				$("#submitForm").attr("action", "/xngzf/archives/exportExcelFangyuan.action").submit();
+			}
+		}
+
+		/** 删除 **/
+		// function del(fyID) {
+		// 	// 非空判断
+		// 	if (fyID == '') return;
+		// 	if (confirm("您确定要删除吗？")) {
+		// 		$("#submitForm").attr("action", "/xngzf/archives/delFangyuan.action?fyID=" + fyID).submit();
+		// 	}
+		// }
+
+		/** 批量删除 **/
+		// function batchDel() {
+		// 	if ($("input[name='IDCheck']:checked").size() <= 0) {
+		// 		art.dialog({ icon: 'error', title: '友情提示', drag: false, resize: false, content: '至少选择一条', ok: true, });
+		// 		return;
+		// 	}
+		// 	// 1）取出用户选中的radio放入字符串传给后台,form提交
+		// 	var allIDCheck = "";
+		// 	$("input[name='IDCheck']:checked").each(function (index, domEle) {
+		// 		bjText = $(domEle).parent("td").parent("tr").last().children("td").last().prev().text();
+		// 		// 			alert(bjText);
+		// 		// 用户选择的radio, 过滤掉“已审核”的，记住哦
+		// 		if ($.trim(bjText) == "已审核") {
+		// 			// 				$(domEle).removeAttr("checked");
+		// 			$(domEle).parent("td").parent("tr").css({ color: "red" });
+		// 			$("#resultInfo").html("已审核的是不允许您删除的，请联系管理员删除！！！");
+		// 			// 				return;
+		// 		} else {
+		// 			allIDCheck += $(domEle).val() + ",";
+		// 		}
+		// 	});
+		// 	// 截掉最后一个","
+		// 	if (allIDCheck.length > 0) {
+		// 		allIDCheck = allIDCheck.substring(0, allIDCheck.length - 1);
+		// 		// 赋给隐藏域
+		// 		$("#allIDCheck").val(allIDCheck);
+		// 		if (confirm("您确定要批量删除这些记录吗？")) {
+		// 			// 提交form
+		// 			$("#submitForm").attr("action", "/xngzf/archives/batchDelFangyuan.action").submit();
+		// 		}
+		// 	}
+		// }
+
+		/** 普通跳转 **/
+		function jumpNormalPage(page) {
+			$("#submitForm").attr("action", "house_list.html?page=" + page).submit();
+		}
+
+		/** 输入页跳转 **/
+		function jumpInputPage(totalPage) {
+			// 如果“跳转页数”不为空
+			if ($("#jumpNumTxt").val() != '') {
+				var pageNum = parseInt($("#jumpNumTxt").val());
+				// 如果跳转页数在不合理范围内，则置为1
+				if (pageNum < 1 | pageNum > totalPage) {
+					art.dialog({ icon: 'error', title: '友情提示', drag: false, resize: false, content: '请输入合适的页数，\n自动为您跳到首页', ok: true, });
+					pageNum = 1;
+				}
+				$("#submitForm").attr("action", "house_list.html?page=" + pageNum).submit();
+			} else {
+				// “跳转页数”为空
+				art.dialog({ icon: 'error', title: '友情提示', drag: false, resize: false, content: '请输入合适的页数，\n自动为您跳到首页', ok: true, });
+				$("#submitForm").attr("action", "house_list.html?page=" + 1).submit();
+			}
+		}
+	</script>
+	<script>
+
+	</script>
+	<style>
+		.alt td {
+			background: black !important;
+		}
+	</style>
+</head>
+
+<body>
+	<form id="submitForm" name="submitForm" action="" method="post">
+		<div id="container">
+
+			<div class="ui_content">
+				<div class="ui_tb">
+					<table id="tab1" class="table" cellspacing="0" cellpadding="0" width="100%" align="center"
+						border="0">
+						
+						<tr>
+							<th width="60">选择
+							</th>
+							<th>编号</th> 
+							<th>论文题目</th>
+							<th>简介</th>
+							<th>拟收录</th>
+							<th>已报名</th>
+							<th>剩余名额</th>
+						</tr>
+
+						<tr th:each="subject:${subjectList}">
+							<td><input type="radio" name="IDCheck" value="14458579642011" class="acb" /></td>
+							<td th:text="${subject.subId}">01</td>
+							<td th:text="${subject.subName}">《论持久战》</td>
+							<td><a href="#" th:href="@{'download?subId='+${subject.subId}}">文档下载</a></td>
+							<td th:if="${subject.isSelf==1}">∞</td>
+							<td th:text="${subject.subCount}" th:if="${subject.isSelf!=1}"></td>
+							<td th:text="${subject.getStudentWithSubjectList().size()}">21</td>
+							<td th:if="${subject.isSelf==1}">∞</td>
+							<td th:text="${subject.remain}" th:if="${subject.isSelf!=1}">07</td>
+						</tr>
+
+						<!--
+						<tr>
+							<td><input type="radio" name="IDCheck" value="14458579642011" class="acb" /></td>
+							<td>01</td>
+							<td>《论持久战》</td>
+							<td>著作</td>
+							<td>15</td>
+							<td>03</td>
+							<td>21</td>
+							<td>07</td>
+
+						</tr>
+						-->
+
+
+
+
+					</table>
+				</div>
+
+			</div>
+		</div>
+		<!-- <div id="bot_list">
+			<div class="ui_content">
+				<div class="ui_tb">
+					<table id="tab2" class="table" cellspacing="0" cellpadding="0" width="100%" align="center"
+						border="0" style="margin-top:30px;">
+						<tr>
+							<th>编号</th>
+							<th>论文题目</th>
+							<th>教师姓名</th>
+							<th>退选</th>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div> -->
+
+	</form>
+	<!--添加已选择的论文题目-->
+	<script>
+		(function () {
+			var acb = document.getElementsByClassName("acb");//获取数据的表的选择项
+			var tab2 = $("#tab2", parent.document);//向其中添加
+			var student = window.parent.student;
+			// var all=document.getElementById("all");
+			var leve10 = $(".leve10", parent.document);//教师姓名
+
+
+			let chld = $("#tab2", parent.document).find("tr");
+
+
+			for (let j = 0; j < chld.length; j++) {
+
+				console.log(chld[j].children[1].innerHTML);
+
+			}
+
+
+
+
+
+
+
+			var chosen = window.parent.chosen;
+			console.log(student.now_article);
+			console.log(tab2[0].children[0].children.length - 1);
+			student.now_article = tab2[0].children[0].children.length - 1;
+			// all.onclick=function(){
+			// 	alert("请逐个操作");
+			// 	all.checked=false;
+			// }
+
+
+			//逐个添加
+			// console.log($("#here_area", parent.document).find("span").html());
+			// console.log(tab2[0].children[0].children[2]);
+			// console.log(acb[0].parentNode.parentNode.children[2].innerHTML)
+			// console.log(tab2[0].children[0].children[1]);
+			for (let i = 0; i < acb.length; i++) {
+				acb[i].addEventListener("click", function () {
+					console.log(tab2[0].children[0].children);
+					if (this.checked == true) {
+						var has = false;
+
+						// for(let j=0;j<chosen.length;j++){
+						// 	if(acb[i].parentNode.parentNode.children[1].innerHTML==chosen[j][0]&&$("#here_area", parent.document).find("span").html()==chosen[j][1]){
+						// 		has=true;
+						// 	}
+						// }
+						for (let j = 0; j < chld.length; j++) {
+							if (acb[i].parentNode.parentNode.children[1].innerHTML == chld[j].children[1].innerHTML && $("#here_area", parent.document).find("span").html() == chld[j].children[2].innerHTML) {
+								has = true;
+							}
+						}
+
+						if (has == false && student.now_article < 5) {
+							add(acb[i]);
+						} else {
+							// console.log(has);
+							this.checked = false;
+							alert("人数达到上限或不要重复添加");
+						}
+					} else if (this.checked == false) {
+						this.checked = true;
+						alert("请于总汇表处退选");
+					}
+				}, false);
+			}
+
+
+			function add(acb0) {
+
+				var val = $("#here_area", parent.document).find("span").html();
+				student.now_article++;
+				tab2[0].children[0].innerHTML += "<tr><td>" + acb0.parentNode.parentNode.children[2].innerHTML + "</td><td>" + acb0.parentNode.parentNode.children[1].innerHTML + "</td><td>" + val + "</td><td><button onclick='del()'>退选</button></td></td></tr>";
+				var a = [];
+				a.push(acb0.parentNode.parentNode.children[1].innerHTML);
+				a.push(val);
+				chosen.push(a);
+
+				// tab2[0].children[0].lastChild.lastChild.children[0].addEventListener("click",del,false);
+				tab2[0].children[0].lastChild.lastChild.children[0].addEventListener("click", del, false);
+
+			}
+
+
+
+
+		})()
+
+	</script>
+</body>
+
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script type="text/javascript" src="scripts/jquery/jquery-1.7.1.js"></script>
+    <link href="style/authority/basic_layout.css" rel="stylesheet" type="text/css">
+    <link href="style/authority/common_style.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="scripts/authority/commonAll.js"></script>
+    <script type="text/javascript" src="scripts/fancybox/jquery.fancybox-1.3.4.js"></script>
+    <script type="text/javascript" src="scripts/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/authority/jquery.fancybox-1.3.4.css" media="screen">
+    </link>
+    <script type="text/javascript" src="scripts/artDialog/artDialog.js?skin=default"></script>
+    <title>信息管理系统</title>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var result = 'null';
+            if (result == 'success') {
+                /**  关闭弹出iframe  **/
+                window.parent.$.fancybox.close();
+            }
+        });
+        /** 输入页跳转 **/
+        function jumpInputPage(totalPage) {
+            // 如果“跳转页数”不为空
+            if ($("#jumpNumTxt").val() != '') {
+                var pageNum = parseInt($("#jumpNumTxt").val());
+                // 如果跳转页数在不合理范围内，则置为1
+                if (pageNum < 1 | pageNum > totalPage) {
+                    art.dialog({
+                        icon: 'error',
+                        title: '友情提示',
+                        drag: false,
+                        resize: false,
+                        content: '请输入合适的页数，\n自动为您跳到首页',
+                        cancelVal: '关闭',
+                        cancel: true
+                    });
+                    pageNum = 1;
+                    return;
+                }
+                $("#a_jump").attr("href", "students?start=" + (pageNum - 1));
+            } else {
+                // “跳转页数”为空
+                art.dialog({
+                    icon: 'error',
+                    title: '友情提示',
+                    drag: false,
+                    resize: false,
+                    content: '请输入合适的页数，\n自动为您跳到首页',
+                    cancelVal: '关闭',
+                    cancel: true
+                });
+                return;
+            }
+        };
+
+    </script>
+    <style>
+        .alt td {
+            background: black !important;
+        }
+
+        .ui_input_btn01 {
+            border: 1px solid rgb(185, 184, 184);
+            background-color: #f7f4f4;
+            border-radius: 5px 5px;
+            width: 70px;
+            height: 28px;
+            line-height: 20px;
+            text-align: center;
+            /* border-style: none; */
+            cursor: pointer;
+            font-family: "Microsoft YaHei", "微软雅黑", "sans-serif";
+            /*background: url(../../images/login/btn.jpg) 0px -1px no-repeat;*/
+        }
+    </style>
+</head>
+
+<body>
+<span id="remain" th:text="'本选题剩余可选人数为:'+${subject.getRemain()}" style="color: red;margin-left: 20px"></span>
+<form id="submitForm" name="submitForm" action="" method="post">
+    <input type="hidden" name="allIDCheck" value="" id="allIDCheck"/>
+    <input type="hidden" name="fangyuanEntity.fyXqName" value="" id="fyXqName"/>
+    <div id="container">
+        <div class="ui_content">
+            <div class="ui_tb">
+                <table id="table1" cellspacing="0" cellpadding="0" width="100%" align="center" border="0">
+                    <tr>
+                        <th width="60">选择
+                        </th>
+                        <th>学生姓名</th>
+                        <th>学号</th>
+                        <th>年级</th>
+                        <th>绩点成绩</th>
+                        <th>第二课堂成绩</th>
+
+                    </tr>
+                    <tr th:each="stu : ${page.content}">
+                        <td><input type="radio" name="IDCheck" value="14458579642011" class="acb"/></td>
+                        <td th:text="${stu.sName}">赵四</td>
+                        <td th:text="${stu.sId}">2019015471</td>
+                        <td th:text="${stu.grade}">软件学院1班</td>
+                        <td th:text="${stu.oblJd}">2.5</td>
+                        <td th:text="${stu.scScore}">4.0</td>
+                    </tr>
+
+
+                </table>
+            </div>
+            <div class="ui_tb_h30">
+                <div class="ui_flt" style="height: 30px; line-height: 30px;">
+                    共有
+                    <span class="ui_txt_bold04" th:text="${page.getTotalElements()}"></span>
+                    条记录，当前第
+                    <span class="ui_txt_bold04">
+							<span class="s1" th:text="${page.getNumber() + 1}"></span>
+							/
+							<span th:text="${page.totalPages}"></span>
+						</span>
+                    页
+                </div>
+                <div class="ui_frt">
+                    <!--    如果是第一页，则只显示下一页、尾页 -->
+
+                    <a th:href="@{/students(start = 0)}"><input type="button" value="首页"
+                                                                class="ui_input_btn01"/></a>
+                    <a th:if="${not page.isFirst()}" th:href="@{/students(start=${page.number-1})}"><input
+                            type="button"
+                            value="上一页"
+                            class="ui_input_btn01"/></a>
+                    <a th:if="${not page.isLast()}" th:href="@{/students(start=${page.number+1})}"><input
+                            type="button"
+                            value="下一页"
+                            class="ui_input_btn01"/></a>
+                    <!-- onclick="jumpNormalPage(2);"-->
+                    <a th:href="@{/students(start = ${page.totalPages - 1})}"><input type="button" value="尾页"
+                                                                                     class="ui_input_btn01"/></a>
+
+
+                    <!--     如果是最后一页，则只显示首页、上一页 -->
+
+                    转到第<input type="number" id="jumpNumTxt" class="ui_input_txt01"/>页
+                    <a id="a_jump" th:onclick="jumpInputPage([[${page.totalPages}]])">
+                        <input type="button" class="ui_input_btn01" value="跳转"/>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        <div style="float:right ;margin-top:20px;">
+            <input type="button" value="提交" class="ui_input_btn01" onclick="isSubmit()"/>
+        </div>
+    </div>
+</form>
+<!--添加学生-->
+<div class="ui_content" style="overflow-y: auto">
+    <div class="ui_tb">
+        <table id="tab" class="table" cellspacing="0" cellpadding="0" width="100%" align="center" border="0">
+            <tr>
+                <th>学生姓名</th>
+                <th>试题</th>
+                <th>学号</th>   <!-- 修改：将班级改为了学号 -->
+                <th>绩点成绩</th>
+                <th>第二课堂成绩</th>
+                <th>退选</th>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    var chosen = [];
+    var jsonStr=[[${session.subList}]];
+    //alert(jsonStr);
+    var arr=eval("("+jsonStr+")");
+    var table = document.getElementsByClassName("table");
+    var teacher = {
+        MAX_STUDENT: 13,
+        now_student: 0
+
+    }
+
+    /**
+     *  "沉浸式教学和任务驱动法在高校电子商务管理类双语课案例教学中的应用": {MAX_STUDENT: 3, now_student: 0},
+     *  "测试项目B": {MAX_STUDENT: 3, now_student: 0}
+     */
+    for(var i in arr){
+        var obj=arr[i];
+        var temp={};
+        temp['MAX_STUDENT']=obj.max;
+        temp['now_student']=0;
+        teacher[''+obj.subName+'']=temp;
+        //teacher[""+obj.subName+""]["MAX_STUDENT"]=obj.max;
+        //teacher[""+obj.subName+""]["now_student"]=0;
+    }
+    //alert(teacher);
+    console.log(teacher);
+    function del() {
+        var a = document.activeElement;
+        for (let i = 0; i < chosen.length; i++) {
+            if (a.parentNode.parentNode.children[0].innerHTML == chosen[i][0] && a.parentNode.parentNode.children[1].innerHTML == chosen[i][1]) {
+                chosen.splice(i, 1);
+            }
+        }
+        for (var i in teacher) {
+            if (i == a.parentNode.parentNode.children[1].innerHTML) {
+                teacher[i].now_student--;
+            }
+        }
+        a.parentNode.parentNode.remove();
+        teacher.MAX_STUDENT.now_article--;
+    }
+</script>
+<script>
+
+    // 当 课题 有剩余容量时，才可以提交
+    function isSubmit() {
+        var remain = [[${subject.getRemain()}]];
+        if (remain <= 0){
+            art.dialog({
+                icon: 'error',
+                title: '友情提示',
+                drag: false,
+                resize: false,
+                content: '本课题已满',
+                cancelVal: '关闭',
+                cancel: true
+            });
+        }else {
+            var tr = $("#tab tr");//获取table中每一行内容
+            var result = []; // 数组
+            for (var i = 0; i < tr.length; i++) {
+                var tds = $(tr[i]).find("td");
+                if (tds.length > 0) {
+                    result.push({
+                        "stuId": $(tds[2]).text(),
+                        "subId": '[[${subject.getSubId()}]]',
+                    })
+                }
+            }
+            var jsonData = { <!--json 数据-->
+                "stuwithLst" : result
+            }
+
+            $.ajax({
+                type : "post",
+                url : "/selectTopic",
+                contentType :  "application/json;charset=UTF-8",
+                data : JSON.stringify(jsonData), <!--将json数据转化为字符串-->
+                dataType : "json",
+                success : function (data) {
+                    if (data.result == "ok") {
+                        art.dialog({
+                            icon: 'error',
+                            title: '友情提示',
+                            drag: false,
+                            resize: false,
+                            content: '选定成功',
+                            cancelVal: '关闭',
+                            cancel: true,
+                            close :function () {
+                                location.reload(true);
+                            }
+                        });
+                    }
+                    if (data.result == "no"){
+                        art.dialog({
+                            icon: 'error',
+                            title: '友情提示',
+                            drag: false,
+                            resize: false,
+                            content: '请选定至少一个',
+                            cancelVal: '关闭',
+                            cancel: true,
+                            close : function () {
+                                location.reload(true);
+                            }
+                        });
+                    }
+                    // else{
+                    //     art.dialog({
+                    //         icon: 'error',
+                    //         title: '友情提示',
+                    //         drag: false,
+                    //         resize: false,
+                    //         content: '选定失败，请重新选择',
+                    //         cancelVal: '关闭',
+                    //         cancel: true
+                    //     });
+                    // }
+                }
+            })
+        }
+    };
+
+    (function () {
+
+        var table = $(".table", self.document);
+        var acb = document.getElementsByClassName("acb");
+        var teacher = window.self.teacher;
+        var dleft_tab1 = $("#dleft_tab1", parent.document);
+
+        var chosen = window.self.chosen;
+        console.log(chosen);
+        console.log(teacher);
+        console.log($("#here_area", parent.document).find("span").html());
+        //逐个添加
+        for (let i = 0; i < acb.length; i++) {
+            acb[i].addEventListener("click", function () {
+                if (this.checked == true) {
+                    var has = false;
+                    for (let j = 0; j < chosen.length; j++) {
+                        // console.log(acb[i].parentNode.parentNode.children[1].innerHTML);
+                        if (acb[i].parentNode.parentNode.children[1].innerHTML == chosen[j][0] && $("#here_area", parent.document).find("span").html() == chosen[j][1]) {
+                            has = true;
+                        }
+                    }
+                    if (has == false && teacher.now_student < 13 && teacher[$("#here_area", parent.document).find("span").html()].now_student < 3) {
+                        add(acb[i]);
+                    } else {
+                        this.checked = false;
+                        alert("达到选题人数上限或不能重复添加");
+                    }
+                }
+            }, false);
+        }
+
+        //点击不同选题添加标记(点击时需要先清空)  bug:需要点两次
+        for (let i = 0; i < dleft_tab1[0].children.length; i++) {
+            for (let j = 0; j < dleft_tab1[0].children.length; j++) {
+                dleft_tab1[0].children[j].shiti = false;
+            }
+            dleft_tab1[0].children[i].children[1].addEventListener("click", function () {
+                for (let j = 0; j < dleft_tab1[0].children.length; j++) {
+                    dleft_tab1[0].children[j].shiti = false;
+                }
+                dleft_tab1[0].children[i].shiti = true;
+                // console.log(dleft_tab1[0].children[i].shiti);
+                // console.log("aaa");
+            }, false);
+        }
+
+        //添加元素
+        function add(acb0) {
+
+            teacher.now_student++;
+            var val = $("#here_area", parent.document).find("span").html();
+            teacher[val].now_student++;
+            var a = [];
+            a.push(acb0.parentNode.parentNode.children[1].innerHTML);
+            a.push(val);
+            chosen.push(a);
+            table[0].children[0].innerHTML += "<tr><td >" + acb0.parentNode.parentNode.children[1].innerHTML + "</td><td>" + val + "</td><td>" + acb0.parentNode.parentNode.children[2].innerHTML + "</td><td>" + acb0.parentNode.parentNode.children[4].innerHTML + "</td><td>" + acb0.parentNode.parentNode.children[5].innerHTML + "</td><td><button onclick='del()'>退选</button></td></tr>";
+            table[0].children[0].lastChild.lastChild.children[0].addEventListener("click", del, false);
+
+        }
+
+    })()
+</script>
+
+</body>
+
+</html>

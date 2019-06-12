@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:th="http://www.thymeleaf.org"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>论文选题系统登录</title>
+<link th:href="@{/Login_files/style_log.css}" href="./Login_files/style_log.css" rel="stylesheet" type="text/css">
+<link th:href="@{/Login_files/style.css}" rel="stylesheet" type="text/css" href="./Login_files/style.css">
+<link th:href="@{/Login_files/userpanel.css}" rel="stylesheet" type="text/css" href="./Login_files/userpanel.css">
+<link th:href="@{/Login_files/jquery.ui.all.css}" rel="stylesheet" type="text/css" href="./Login_files/jquery.ui.all.css">
+
+</head>
+<script th:inline="javascript">
+	window.onload=function (ev) {
+		var msg=[[${msg}]];
+		if(msg!=null){
+			alert(msg);
+		}
+		document.getElementById("username").onfocus=function (ev1) {
+			document.getElementById("username").value="";
+		}
+		document.getElementById("username").onblur=function (ev1) {
+			if(document.getElementById("username").value==""){
+				document.getElementById("username").value="教务系统账号";
+			}
+		}
+	}
+</script>
+<body class="login" mycollectionplug="bind">
+<form action="" method="post" th:action="@{/login}">
+<div class="login_m">
+<div class="login_logo">
+	<img src="./Login_files/school_name.png" width="260" id="school_name">
+	<img src="./Login_files/logo.png" id="web_title" width="240">
+	<p id="en_title">Hebei Normal University thesis selection system</p>
+</div>
+<div class="login_boder">
+	<div class="login_padding" id="login_model">
+
+	  <h2>账 号</h2>
+	  <label>
+	    <input type="text" id="username" name="username" class="txt_input txt_input2"  value="教务系统账号">
+	  </label>
+	  <h2>密 码</h2>
+	  <label>
+	    <input type="password" name="password" id="userpwd" class="txt_input" value="">
+		  <script type="javascript">
+
+		  </script>
+	  </label>
+	 
+	  <div style="height: 20px;"><!--space--></div>
+	  <div class="rem_sub">
+		  <div class="rem_sub_l">
+		  <input type="radio" name="role" value="student" checked>学生
+		  <input type="radio" name="role" value="teacher">教师
+		  <input type="radio" name="role" value="administrator">管理员
+		   
+		  </div>
+		  <label>
+		    <input type="submit" class="sub_button" name="button" id="button" value="登录" style="opacity: 0.7;">
+		  </label>
+	  </div>
+	</div>
+
+	<div class="login_padding" id="school_icon">
+		<img src="./Login_files/school_logo.png" width="196">
+	</div>
+
+<!--login_padding  Sign up end-->
+</div><!--login_boder end-->
+</div><!--login_m end-->
+ <br> <br>
+<p align="center" style="color: white; margin-top: 40px;"> 本系统由 <a href="http://www.hebtu.edu.cn/" style="color: white">河北师范大学</a> - <a href="http://software.hebtu.edu.cn/" style="color: white">软件学院</a> 负责技术支持 </p>
+
+
+</form>
+
+
+</body>
+</html>

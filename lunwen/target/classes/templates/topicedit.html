@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>信息管理系统</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script type="text/javascript" src="/scripts/jquery/jquery-1.7.1.js"></script>
+    <link href="/style/authority/basic_layout.css" rel="stylesheet" type="text/css">
+    <link href="/style/authority/common_style.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/scripts/authority/commonAll.js"></script>
+    <script src="/scripts/My97DatePicker/WdatePicker.js" type="text/javascript" defer="defer"></script>
+    <script type="text/javascript" src="/scripts/artDialog/artDialog.js?skin=default"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            /*
+             * 提交
+             */
+            $("#submitbutton").click(function () {
+                if (validateForm()) {
+                    checkFyFhSubmit();
+                }
+            });
+
+            /*
+             * 取消
+             */
+            $("#cancelbutton").click(function () {
+                /**  关闭弹出iframe  **/
+                window.parent.$.fancybox.close();
+            });
+
+            var result = 'null';
+            if (result == 'success') {
+                /**  关闭弹出iframe  **/
+                window.parent.$.fancybox.close();
+            }
+        });
+
+        /** 检测房源房号是否存在并提交form  **/
+        function checkFyFhSubmit() {
+            // 获取论文名称
+            var fyDh = $("#fyDh").val();
+            if (fyDh != "") {
+                // 异步判断该房室是否存在，如果已存在，给用户已提示哦
+                $.ajax({
+                    type: "GET",
+                    url: "/checkSubName",
+                    data: {"subName": fyDh},
+                    dataType: "json",
+                    contentType: "application/json:charset=UTF-8",
+                    success: function (data, status) {
+// 					alert(data);
+                        // 如果返回数据不为空，添加“论文信息”
+                        if (data.result == "查到了") {
+                            art.dialog({
+                                icon: 'error',
+                                title: '友情提示',
+                                drag: false,
+                                resize: false,
+                                content: '该论文题目已经存在，请您重新定题',
+                                ok: true,
+                            });
+                            return false;
+                        }
+                        else {
+                            if ([[${subject != null}]]) {
+                                art.dialog({
+                                    icon: 'error',
+                                    title: '友情提示',
+                                    drag: false,
+                                    resize: false,
+                                    content: '选定成功',
+                                    cancelVal: '关闭',
+                                    cancel: true,
+                                    close :function () {
+                                        $("#submitForm").attr("action", "/subject").submit();
+                                    }
+                                });
+                            }
+                            else
+                                $("#submitForm").attr("action", "/upload").submit();
+                        }
+                    }
+                });
+            }
+            return true;
+        }
+
+        /** 表单验证  **/
+        function validateForm() {
+            if ($("#fyDh").val() == "") {
+                art.dialog({icon: 'error', title: '友情提示', drag: false, resize: false, content: '请填写论文名称', ok: true,});
+                return false;
+            }
+            if ($("#fyCh").val() == "") {
+                art.dialog({icon: 'error', title: '友情提示', drag: false, resize: false, content: '请论文填写要求人数', ok: true,});
+                return false;
+            }
+            if ($("#fyCh").val() != "") {
+                var pageNum = parseInt($("#fyCh").val());
+                // 如果跳转页数在不合理范围内，则置为1
+                if (pageNum <= 0) {
+                    art.dialog({
+                        icon: 'error',
+                        title: '友情提示',
+                        drag: false,
+                        resize: false,
+                        content: '请输入合适的人数上限',
+                        cancelVal: '关闭',
+                        cancel: true
+                    });
+                    return false;
+                }
+            }
+            if ($("#fyFile").val() == ""){
+                art.dialog({icon: 'error', title: '友情提示', drag: false, resize: false, content: '请选择要上传的文档', ok: true,});
+                return false;
+            }
+            return true;
+        }
+
+    </script>
+    <style>
+        .ui_input_btn01 {
+            border: 1px solid rgb(185, 184, 184);
+            background-color: #f7f4f4;
+            border-radius: 5px 5px;
+            width: 70px;
+            height: 28px;
+            line-height: 20px;
+            text-align: center;
+            /* border-style: none; */
+            cursor: pointer;
+            font-family: "Microsoft YaHei", "微软雅黑", "sans-serif";
+            /*background: url(../../images/login/btn.jpg) 0px -1px no-repeat;*/
+        }
+    </style>
+</head>
+<body>
+
+      <div th:if="${not #strings.isEmpty(msg)}" style="margin-left: 30px">
+          <span th:text="${(not #strings.isEmpty(msg))}?${msg}" style="color: red"></span>
+      </div>
+<div id="topic_cs">
+    <form style="height: 180px;" id="submitForm" name="submitForm" th:action="@{/subject}"
+          method="post" enctype="multipart/form-data">
+        <input type="hidden" name="_method" value="put" th:if="${subject!=null}">
+        <input type="hidden" name="id" th:value="${subject!=null}?${subject.getSubId()}">
+        <div id="container" style="height: 180px;">
+            <div class="ui_content" style="height: 180px;">
+                <table style="height: 180px;" cellspacing="0" cellpadding="0" width="100%" align="left" border="0">
+                    <tr class="trrr">
+                        <td class="ui_text_rt">论文名称</td>
+                        <td>&nbsp</td>
+                        <td class="ui_text_lt">
+                            <input th:placeholder="${subject!=null}?${subject.getSubName()}"
+                                   style="width:150px; border-radius: 3px 3px;"
+                                   type="text" name="fyDhCode" id="fyDh" class="ui_select01"/>
+
+                        </td>
+                    </tr>
+                    <tr class="trrr">
+                        <td class="ui_text_rt">要求人数</td>
+                        <td>&nbsp</td>
+                        <td class="ui_text_lt">
+                            <input th:value="${subject!=null}?${subject.getSubCount()}"
+                                   style="width:50px;border-radius: 3px 3px;"
+                                   type="number" id="fyCh" name="fyCh" class="ui_input_txt01"/>
+                        </td>
+                    </tr>
+                    <tr class="trrr">
+                        <td class="ui_text_rt">论题介绍</td>
+                        <td>&nbsp</td>
+                        <td class="ui_text_lt">
+                            <input id="fyFile" type="file" name="file">
+                        </td>
+                    </tr>
+                    <tr class="trrr">
+                        <td>&nbsp;</td>
+                        <td>&nbsp</td>
+                        <td class="ui_text_lt" style="height: 50px;">
+                            &nbsp;<input id="submitbutton" type="botton" th:value="${subject!=null}?'修改':'添加'"
+                                         class="ui_input_btn01"/>
+                            &nbsp;<input id="cancelbutton" type="button" th:if="${subject!=null}" th:value="取消"
+                                         class="ui_input_btn01"/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

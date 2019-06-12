@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="../scripts/jquery/jquery-1.7.1.js"></script>
+<link href="../style/authority/basic_layout.css" rel="stylesheet" type="text/css">
+<link href="../style/authority/common_style.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="../scripts/authority/commonAll.js"></script>
+<script type="text/javascript" src="../scripts/fancybox/jquery.fancybox-1.3.4.js"></script>
+<script type="text/javascript" src="../scripts/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+<link rel="stylesheet" type="text/css" href="../style/authority/jquery.fancybox-1.3.4.css" media="screen"></link>
+<script type="text/javascript" src="../scripts/artDialog/artDialog.js?skin=default"></script>
+<title>论文选题系统</title>
+<script type="text/javascript">
+	$(document).ready(function(){
+
+	    var pagen=parseInt($("#page").val());
+        var tpn = parseInt($("#tp").val());
+        if (pagen+1>=tpn) {
+            $("#next").attr("style","display:none");
+            $("#weiye").attr("style","display:none");
+        }
+        if($("#page").val()==0){
+            $("#up").attr("style","display:none");
+            $("#shouye").attr("style","display:none");
+        }
+	});
+	/** 用户角色   **/
+	var userRole = '';
+	/** Excel导出  **/
+	function exportExcel(){
+		if( confirm('您确定要导出吗？') ){
+			$("#submitForm").attr("action", "exportExcel").submit();
+		}
+	}
+	/** 页面跳转 **/
+	function jumpNormalPage(b){
+	    var m = b.value;
+	    var tzn = parseInt($("#jumpNum").val());
+        var tpn = parseInt($("#tp").val());
+		if (m=="首页"||m=="搜索"){
+			$("#aaaaa").val(0);
+		}else if (m=="上一页"){
+			$("#aaaaa").val(1);
+		} else if(m=="下一页"){
+			$("#aaaaa").val(2);
+		}else if(m=="跳转"){
+			if(tzn>0&&tzn<=tpn){
+                $("#aaaaa").val(4);
+			}else{
+                $("#jumpNum").val()=="";
+                alert("输入的页码错误！！");
+                $("#aaaaa").val(5);
+			}
+		}else if (m=="尾页") {
+			$("#aaaaa").val(3);
+		}
+
+            $("#submitForm").attr("action", "manner_list").submit();
+
+
+
+	}
+    function msgbox(n){
+        document.getElementById("input"+n).style.display=1?'block':'none';     /* 点击按钮打开对话框 */
+        document.getElementById("ei"+n).style.display="none";
+    }
+    function msgboxno(n){
+        document.getElementById("input"+n).style.display=0?'block':'none';     /*关闭 对话框 */
+        document.getElementById("ei"+n).style.display="inline";
+    }
+</script>
+<style>
+	.alt td{ background:black !important;}
+	.ed{
+		width:100% ;
+		frame:void;
+		rules:none;
+	}
+	.ed td{
+		width:200px ;
+	}
+	#sure {
+		text-align:center;
+		width: 100px;
+	}
+	.box{
+		width:500px; margin-top:10%; margin:auto; padding:10px;
+		height:auto;
+		display: none;       /* display:none; 默认对话框隐藏 */
+		border-width: 1px;
+		border-color: #1A5CC6;
+	}
+	.box.show{display:block;}
+	.box .x{ font-size:0.9em; text-align:right; display:block;}
+	.box input{width:200px;  font-size: 0.9em;}
+</style>
+</head>
+<body>
+		<input type="hidden" name="allIDCheck" value="" id="allIDCheck"/>
+		<input type="hidden" name="fangyuanEntity.fyXqName" value="" id="fyXqName"/>
+		<div id="container">
+			<div class="ui_content">
+				<div class="ui_text_indent">
+					<div id="box_border">
+						<div id="box_top">搜索</div>
+							<!--搜索选择条件表单-->
+							<div id="box_center">
+								状态
+								<select name="state" form="submitForm" id="fyXq" class="ui_select01" onchange="getFyDhListByFyXqCode();">
+									<option value="-1" th:selected="${session.state}==-1">--请选择--</option>
+									<option value="1" th:selected="${session.state}==1">已完成</option>
+									<option value="0" th:selected="${session.state}==0">未完成</option>
+								</select>
+								老师
+								<select name="teacher" form="submitForm" id="fyDh" class="ui_select01">
+									<option  th:selected="session.teacher=='all'" value="all">--请选择--</option>
+									<option th:each="t:${session.tlist}" th:value="${t.tName}" th:selected="${session.teacher}==${t.tName}">[[${t.tName}]]</option>
+								</select>
+								<input type="button" class="ui_input_btn01" onclick="jumpNormalPage(this)" value="搜索">
+							</div>
+
+
+					</div>
+				</div>
+			</div>
+			<div class="ui_content">
+				<div class="ui_tb">
+					<!--选题展示表单-->
+					<table class="table" cellspacing="0" cellpadding="0" width="100%" align="center" border="0">
+						<tr>
+							<!-- <th width="30"> -->
+							</th>
+							<th>选题编号</th>
+							<th>论题名称</th>
+							<th>老师</th>
+							<th>人数</th>
+							<th>已选人数</th>
+							<th>操作</th>
+						</tr>
+						<!--遍历展示数据-->
+						<tr th:each="sub:${sublist}">
+							<td th:text="${sub.subId}"></td>
+							<td th:text="${sub.subName}"></td>
+							<td th:text="${sub.teacher.tName}"></td>
+							<td th:text="${sub.getSubCount()}"></td>
+							<td th:text="${sub.getSubCount()}-${sub.remain}"></td>
+							<td>
+								<a th:href="|javascript:msgbox('${subStat.index}')|" th:id="ei+${subStat.index}">编辑</a>
+								<div th:id="input+${subStat.index}" class="box" style="width: 90%">
+									<!--编辑的表单-->
+									<form th:action="@{/edit/}+${sub.subId}"  method="post">
+										<input type="hidden" name="_method" value="put" th:if="${sub!=null}">
+										<a th:href="|javascript:msgboxno('${subStat.index}')|">关闭编辑窗口</a>
+										<table class="ed">
+											<tr>
+												<td>选题编号</td>
+												<td><input type="text"th:value="${sub.subId}"  th:name="subId+${sub.subId}" class="ui_input_txt01"></td>
+											</tr>
+											<tr>
+												<td>论题名称</td>
+												<td><input type="text"  th:value="${sub.subName} "  th:name="subName+${sub.subId}" class="ui_input_txt01"></td>
+											</tr>
+											<tr>
+												<td>老师</td>
+												<td><input type="text" th:value="${sub.teacher.tName}"  th:name="tName+${sub.subId}"class="ui_input_txt01"></td>
+											</tr>
+											<tr>
+												<td>人数</td>
+												<td><input type="text" th:value="${sub.subCount}"  th:name="subCount+${sub.subId}" class="ui_input_txt01"></td>
+											</tr>
+											<tr>
+												<td>已选人数</td>
+												<td><input type="text" th:value="${sub.subCount}-${sub.remain}" th:name="selectedNum+${sub.subId}" class="ui_input_txt01"></td>
+											</tr>
+										</table>
+										<input type="submit" value="确定修改" class="ui_input_btn01">
+									</form>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<form id="submitForm" name="submitForm" action="" method="post">
+				<div class="ui_tb_h30">
+					<div class="ui_flt" style="height: 30px; line-height: 30px;">
+						共有
+						<span class="ui_txt_bold04">[[${sublist.getTotalElements()}]]</span>
+						条记录，当前第
+						<span class="ui_txt_bold04">[[${sublist.getTotalPages()}==0?${sublist.getTotalPages()}:${sublist.getNumber()}+1]]
+						/[[${sublist.getTotalPages()}]]
+						</span>
+						页
+					</div>
+					<div class="ui_frt">
+						<input type="button" id="export" name="export" value="导出" class="ui_input_btn01" onclick="exportExcel()">
+						<!--    如果是第一页，则只显示下一页、尾页 -->
+						<input type="hidden" id="aaaaa" name="aaaaa" value="">
+						<input type="hidden" id="page" name="page" th:value="${sublist.getNumber()}">
+						<input type="hidden" id="tp" name="tp" th:value="${sublist.getTotalPages()}">
+						<input type="button"  id="shouye" name="shouye" value="首页" class="ui_input_btn01" onclick="jumpNormalPage(this)"/>
+						<input type="button" id="up" value="上一页" class="ui_input_btn01"  onclick="jumpNormalPage(this)"/>
+						<input type="button" id="next" value="下一页" class="ui_input_btn01" onclick="jumpNormalPage(this)"/>
+						<input type="button" id="weiye" value="尾页" class="ui_input_btn01" onclick="jumpNormalPage(this)">
+						<!--     如果是最后一页，则只显示首页、上一页 -->
+						转到第<input type="number" id="jumpNum" name="jumpNum" class="ui_input_txt01" />页
+						<input type="submit" class="ui_input_btn01" value="跳转"onclick="jumpNormalPage(this)"/>
+					</div>
+				</div>
+				</form>
+			</div>
+		</div>
+</body>
+</html>
